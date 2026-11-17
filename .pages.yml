@@ -1,0 +1,37 @@
+media:
+  input: assets
+  output: /assets
+  categories: [image, video]
+
+content:
+  - name: projects
+    label: My Portfolio Projects
+    type: collection
+    path: content/projects
+    format: yaml-frontmatter
+    fields:
+      - name: title
+        label: Project Title
+        type: string
+
+      - name: category
+        label: Category
+        type: string
+
+      - name: description
+        label: Project Description
+        type: text
+
+      - name: thumbnail
+        label: Project Image
+        type: image
+
+      - name: video
+        label: Project Video
+        type: file
+        options:
+          categories: [video]
+
+      - name: featured
+        label: Featured Project
+        type: boolean
