@@ -48,14 +48,14 @@ footer{border-top:1px solid #ffffff18;padding:27px 0;color:#91858b;font-size:.76
 <main>
 <section class="hero" id="home"><div class="wrap heroGrid"><div class="heroText reveal"><div class="eyebrow mono">Next-generation creative studio</div><h1>THE FUTURE<br>IS <span class="red">VISUAL.</span></h1><p>We transform products into cinematic experiences with AI-powered creativity, bold visual storytelling and next-generation design.</p><div class="actions"><a class="btn" href="#work">Explore our work ↗</a><a class="btn secondary" href="enquiry.html">Start a project</a></div></div><div class="orbWrap reveal"><div class="orb"><div class="core">GF<span class="red">.</span></div></div><div class="orbitLabel mono">CREATIVITY // 2050</div></div></div><div class="bottomLine"><span>Independent AI creative studio</span><span>Designed for what's next ↓</span></div></section>
 <section class="section" id="about"><div class="wrap about"><div class="art reveal"><img class="brand-art-image" src="assets/glowframe-brand-emblem.jpg" alt="GLOWFRAME AI — Turning Products Into Visual Magic"></div><div class="copy reveal"><div class="eyebrow mono">01 / About the studio</div><h2>WE CREATE THE<br><span class="red">FUTURE</span> OF ADS.</h2><p>GLOWFRAME AI is an independent creative studio exploring the possibilities of artificial intelligence, cinematic storytelling and futuristic design. We turn ideas and products into striking visual concepts made to capture attention.</p><div class="stats"><div class="stat"><b>AI-First</b><span>Creative process</span></div><div class="stat"><b>Visual</b><span>Storytelling</span></div><div class="stat"><b>Future</b><span>Focused</span></div></div></div></div></section>
-<section class="section" id="work"><div class="wrap"><div class="head"><div><div class="eyebrow mono">02 / Selected concepts</div><h2>THE WORK<span class="red">.</span></h2></div><p class="intro">A growing collection of AI-powered advertising experiments and creative concepts. More projects coming soon.</p></div><div class="projects">
+<section class="section" id="work"><div class="wrap"><div class="head"><div><div class="eyebrow mono">02 / Selected concepts</div><h2>THE WORK<span class="red">.</span></h2></div><p class="intro">A growing collection of AI-powered advertising experiments and creative concepts. More projects coming soon.</p></div><div class="projects" id="cmsProjects">
 <article class="project medicube has-image reveal"><div><div class="tag">BEAUTY / AI CONCEPT</div><h3>Medicube Collagen Jelly Cream</h3><p>Cinematic skincare product concept advertisement.</p><p class="disclaimer">Unofficial AI concept — not sponsored or endorsed by Medicube.</p></div></article>
 <article class="project perfume reveal"><div><div class="tag">LUXURY / VISUAL DIRECTION</div><h3>Fragrance in Focus</h3><p>Luxury perfume campaign mood and art direction.</p></div></article>
 <article class="project serum reveal"><div><div class="tag">BEAUTY / VISUAL DIRECTION</div><h3>The Serum Edit</h3><p>A premium skincare serum campaign direction.</p></div></article>
 <article class="project fashion reveal"><div><div class="tag">FASHION / VISUAL DIRECTION</div><h3>Future Form</h3><p>Editorial-inspired fashion campaign direction.</p></div></article>
 </div>
 <div class="head" style="margin-top:65px"><div><div class="eyebrow mono">03 / Motion portfolio</div><h2>WATCH THE <span class="red">WORK.</span></h2></div><p class="intro">AI video concepts and social-first edits created by GLOWFRAME AI.</p></div>
-<div class="videoGrid">
+<div class="videoGrid" id="cmsVideos">
 <article class="videoCard reveal"><video controls preload="metadata" playsinline poster="assets/medicube-collagen-cream.png"><source src="assets/medicube-ad-concept.mp4" type="video/mp4">Your browser does not support video.</video><h3>Medicube — Cinematic Product Ad</h3><p>AI-generated skincare advertisement concept.</p></article>
 <article class="videoCard reveal"><video controls preload="metadata" playsinline poster="assets/medicube-collagen-cream.png"><source src="assets/medicube-social-reel.mp4" type="video/mp4">Your browser does not support video.</video><h3>Medicube — Social Reel Edit</h3><p>Short-form product video concept for social media.</p></article>
 </div>
@@ -81,7 +81,115 @@ const nav=document.getElementById('links');document.getElementById('menu').addEv
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');io.unobserve(e.target)}}),{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 if(CONTACT_EMAIL)document.getElementById('emailText').textContent=CONTACT_EMAIL;if(INSTAGRAM_URL){let a=document.getElementById('ig');a.href=INSTAGRAM_URL;a.textContent='Visit Instagram';a.target='_blank';a.rel='noopener'}
 document.getElementById('contactForm').addEventListener('submit',e=>{e.preventDefault();let s=document.getElementById('status');if(!CONTACT_EMAIL){s.textContent='Add your contact email in the script (CONTACT_EMAIL) to enable enquiries.';return}let subject=encodeURIComponent('GLOWFRAME AI enquiry — '+document.getElementById('type').value),body=encodeURIComponent('Name: '+document.getElementById('name').value+'\nEmail: '+document.getElementById('email').value+'\nProject: '+document.getElementById('type').value+'\n\n'+document.getElementById('message').value);s.textContent='Opening your email app…';location.href=`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`});
-</script><!--Start of Tawk.to Script-->
+</script>
+<script>
+/* GLOWFRAME AI — Pages CMS portfolio loader.
+   Netlify runs build-projects.js to create projects.json from content/projects. */
+(async function loadGlowframeCmsProjects() {
+  const projectContainer = document.getElementById('cmsProjects');
+  const videoContainer = document.getElementById('cmsVideos');
+  if (!projectContainer) return;
+
+  function safeAssetPath(path) {
+    if (!path) return '';
+    const clean = String(path).trim().replace(/^\/+/, '');
+    return '/' + clean.split('/').map(part => encodeURIComponent(part)).join('/');
+  }
+
+  try {
+    const response = await fetch('/projects.json', { cache: 'no-store' });
+    if (!response.ok) return; // Keep the existing portfolio cards as a fallback.
+    const projects = await response.json();
+    if (!Array.isArray(projects) || projects.length === 0) return;
+
+    projectContainer.innerHTML = '';
+    const uploadedVideos = [];
+
+    projects.forEach(project => {
+      const title = project.title || 'Untitled project';
+      const category = project.category || 'GLOWFRAME AI PROJECT';
+      const description = project.description || '';
+      const image = safeAssetPath(project.thumbnail);
+      const video = safeAssetPath(project.video);
+
+      const card = document.createElement('article');
+      card.className = 'project reveal' + (image ? ' has-image' : '');
+      if (image) {
+        card.style.backgroundImage =
+          'linear-gradient(0deg, rgba(8,6,8,.94) 0%, rgba(8,6,8,.70) 43%, rgba(8,6,8,.05) 100%), url("' +
+          image.replace(/"/g, '%22') + '")';
+      }
+
+      const content = document.createElement('div');
+      const tag = document.createElement('div');
+      tag.className = 'tag';
+      tag.textContent = String(category).toUpperCase();
+      const heading = document.createElement('h3');
+      heading.textContent = title;
+      const paragraph = document.createElement('p');
+      paragraph.textContent = description;
+      content.append(tag, heading, paragraph);
+
+      if (title.toLowerCase().includes('medicube')) {
+        const disclaimer = document.createElement('p');
+        disclaimer.className = 'disclaimer';
+        disclaimer.textContent = 'Unofficial AI concept — not sponsored or endorsed by Medicube.';
+        content.appendChild(disclaimer);
+      }
+
+      card.appendChild(content);
+      projectContainer.appendChild(card);
+      if (video) uploadedVideos.push({ title, category, description, video, image });
+    });
+
+    // Replace the motion portfolio only when at least one CMS video has been uploaded.
+    if (videoContainer && uploadedVideos.length) {
+      videoContainer.innerHTML = '';
+      uploadedVideos.forEach(project => {
+        const card = document.createElement('article');
+        card.className = 'videoCard reveal';
+        const player = document.createElement('video');
+        player.controls = true;
+        player.preload = 'metadata';
+        player.playsInline = true;
+        if (project.image) player.poster = project.image;
+        const source = document.createElement('source');
+        source.src = project.video;
+        source.type = 'video/mp4';
+        player.appendChild(source);
+
+        const heading = document.createElement('h3');
+        heading.textContent = project.title;
+        const description = document.createElement('p');
+        description.textContent = project.description || project.category || '';
+        card.append(player, heading, description);
+        videoContainer.appendChild(card);
+      });
+    }
+
+    // Re-observe CMS-created cards so the site's existing reveal animation applies.
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('show');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      projectContainer.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+      if (videoContainer) videoContainer.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    } else {
+      document.querySelectorAll('#cmsProjects .reveal, #cmsVideos .reveal')
+        .forEach(el => el.classList.add('show'));
+    }
+  } catch (error) {
+    console.warn('GLOWFRAME AI CMS portfolio could not load; showing the existing portfolio.', error);
+  }
+})();
+</script>
+
+<!--Start of Tawk.to Script-->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
 (function(){
